@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Mentor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgb(128, 0, 255);
+            width: 300px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: rgb(128, 0, 255);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: rgb(64, 0, 128);
+        }
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            color: rgb(128, 0, 128);
+        }
+    </style>
+</head>
+<body>
+
+    <form id="createMentorForm">
+        <h2>Create Mentor</h2>
+        <label for="mentorName">Mentor Name:</label>
+        <input type="text" id="mentorName" name="mentorName" required>
+
+        <h3>Students</h3>
+        <div id="studentsContainer">
+            <div class="student">
+                <label for="studentName1">Student Name:</label>
+                <input type="text" id="studentName1" name="studentName" required>
+            </div>
+        </div>
+
+        <button type="button" id="addStudentBtn">Add Student</button><br><br>
+        <button type="button" id="createMentorBtn">Create Mentor</button>
+
+        <div id="responseMessage"></div>
+    </form>
+
+    <script>
+        let studentCount = 1;
+
+        document.getElementById('addStudentBtn').addEventListener('click', function() {
+            studentCount++;
+            const studentDiv = document.createElement('div');
+            studentDiv.className = 'student';
+            studentDiv.innerHTML = `
+                <label for="studentName${studentCount}">Student Name:</label>
+                <input type="text" id="studentName${studentCount}" name="studentName" required>
+            `;
+            document.getElementById('studentsContainer').appendChild(studentDiv);
+        });
+
+        document.getElementById('createMentorBtn').addEventListener('click', async function() {
+            const mentorName = document.getElementById('mentorName').value;
+
+            const studentElements = document.querySelectorAll('input[name="studentName"]');
+            const students = Array.from(studentElements).map(input => ({
+                name: input.value
+            }));
+
+            const mentorData = {
+                name: mentorName,
+                students: students
+            };
+
+            try {
+                const response = await fetch('http://localhost:8085/mentors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mentorData)
+                });
+
+                const result = await response.json();
+                document.getElementById('responseMessage').innerText = 'Mentor Created: ' + JSON.stringify(result);
+            } catch (error) {
+                console.error('Error creating mentor:', error);
+                document.getElementById('responseMessage').innerText = 'Error: ' + error.message;
+            }
+        });
+    </script>
+
+</body>
+</html>
